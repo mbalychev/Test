@@ -86,5 +86,9 @@ namespace WebTest.Services
             throw new NotImplementedException("no field to changes");
         }
 
+        Task IServices<OrganizationsModel>.CreateAsync(string inn, string rating)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

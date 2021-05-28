@@ -6,27 +6,22 @@ using WebTest.Entities;
 
 namespace WebTest.Models
 {
-    public class OrganizationsModel
+    public class OrganizationsModel : Organization
     {
-        private int id;
-        private int inn;
-
-        public int Id { get => id; }
-        public int Inn { get => inn; }
         public OrganizationsModel(int id, int inn)
         {
-            this.id = id;
+            Id = id;
             if (inn == 12) //inn organization
-                this.inn = inn;
+                Inn = inn;
             else
                 throw new Exception("wrong inn number");
         }
 
         public OrganizationsModel(Organization organization)
         {
-            this.id = organization.Id;
-            if (inn == 12) //inn organization
-                this.inn = organization.Inn;
+            Id = organization.Id;
+            if (Inn == 12) //inn organization
+                Inn = organization.Inn;
             else
                 throw new Exception("wrong inn number");
         }

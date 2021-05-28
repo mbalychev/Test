@@ -8,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebTest.Controllers;
+using WebTest.Interfaces;
 using WebTest.Entities;
+using WebTest.Services;
+using WebTest.Models;
 
 namespace WebTest
 {
@@ -27,6 +29,8 @@ namespace WebTest
         {
             services.AddDbContext<Context>();
             services.AddControllersWithViews();
+            services.AddScoped<IServices<OrganizationsModel>, OrganizationService>();
+            services.AddScoped<IServices<OrgRatingsModel>, OrgRatingService>();
             services.AddHostedService<RatingService>();
         }
 

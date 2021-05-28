@@ -30,6 +30,51 @@ namespace WebTest.Services
             }
         }
 
+        public async Task CreateAsync(string inn, string rating)
+        {
+            int innInt = 0;
+            float ratingFl = 0;
+            if (inn.Length == 12)
+            {
+                try
+                {
+                    innInt = int.Parse(inn);
+                    ratingFl = float.Parse(rating);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("error parse inn or rating");
+                }
+            }
+            else
+                throw new Exception("error inn");
+
+            Organization organization = await FindOrganizationAsync(innInt);
+            try
+            {
+                OrgRating orgRating = new OrgRating { OrganizationId = organization.Id, Rating = ratingFl };
+                await db.OrgRatings.AddAsync(orgRating);
+                await db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        private async Task<Organization> FindOrganizationAsync(int inn)
+        {
+            Organization organization = await db.Organizations.Where(x => x.Inn == inn).FirstOrDefaultAsync();
+            if (organization == null)
+            {
+                await db.Organizations.AddAsync(new Organization { Inn = inn });
+                await db.SaveChangesAsync();
+                organization = await db.Organizations.Where(x => x.Inn == inn).FirstOrDefaultAsync();
+            }
+            return organization;
+
+        }
+
         public async Task DeleteAsync(int id)
         {
             try

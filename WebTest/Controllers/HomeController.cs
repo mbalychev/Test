@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using WebTest.Interfaces;
 using WebTest.Models;
 
 namespace WebTest.Controllers
@@ -22,30 +23,6 @@ namespace WebTest.Controllers
 
         public async Task<IActionResult> Index()
         {
-            HttpClient client = new HttpClient();
-            logger.LogInformation("requst file");
-            HttpResponseMessage response = null;
-            try
-            {
-            response = await client.GetAsync("http://localhost:29461/weatherforecast");
-                if (response.IsSuccessStatusCode)
-                {
-                    logger.LogInformation("file is get");
-                    var res = await response.Content.ReadAsByteArrayAsync();
-                    using (FileStream fstream = new FileStream($"C:\\Users\\Михаил\\Downloads\\note.csv", FileMode.OpenOrCreate))
-                    {
-                        fstream.Write(res, 0, res.Length);
-                    }
-                }
-                else
-                {
-                    logger.LogError("file is not getting");
-                }
-            }
-            catch (Exception e)
-            {
-                logger.LogError($"connecting error: {e.Message}");
-            }
             return View();
         }
 
