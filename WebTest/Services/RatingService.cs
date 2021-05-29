@@ -21,29 +21,17 @@ namespace WebTest.Services
         private int executionCount = 0;
         private static ILogger<RatingService> logger;
         private Timer timer;
-        //static IServices<OrgRatingsModel> ratings;
-        //static IServices<OrganizationsModel> organization;
 
-        public RatingService(ILogger<RatingService> _logger)//, IServices<OrgRatingsModel> ratings, IServices<OrganizationsModel> organization)
+        public RatingService(ILogger<RatingService> _logger)
         {
-            //Context db = new Context();
             logger = _logger;
-            //organization = new OrganizationService(db);
-            //ratings = new OrgRatingService(db);
         }
 
         public async Task StartAsync(CancellationToken stoppingToken)
         {
             logger.LogInformation("Rating service start");
-            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
-            //try
-            //{
-            //    //await Rating.GetLoadAsync(ratings);
-            //}
-            //catch (Exception e)
-            //{
-            //    logger.LogError("error load file: " + e.Message);
-            //}
+            //HACK DoWork create async
+            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
             //return Task.CompletedTask;
         }
 
@@ -52,7 +40,6 @@ namespace WebTest.Services
             var count = Interlocked.Increment(ref executionCount);
             try
             {
-                logger.LogInformation("try get csv file from host: {0}, {0:t}", count, DateTime.Now);
                 GetLoadAsync();
             }
             catch (Exception e)
@@ -82,12 +69,13 @@ namespace WebTest.Services
             HttpResponseMessage response = null;
             try
             {
-                response = await client.GetAsync("http://localhost:29461/weatherforecast");
+                logger.LogInformation("try get csv file from host: {0}");
+                response = await client.GetAsync("http://localhost:29461/ratings");
                 if (response.IsSuccessStatusCode)
                 {
-                    byte[] res = await response.Content.ReadAsByteArrayAsync();
-                    //WriteFile(res);
-                    await ParseFile(res); 
+                    byte[] responseBytes = await response.Content.ReadAsByteArrayAsync();
+                    logger.LogInformation("get {0} bytes", responseBytes.Length);
+                    await ParseFile(responseBytes); 
                 }
                 else
                 {
@@ -96,61 +84,32 @@ namespace WebTest.Services
             }
             catch (Exception e)
             {
-                throw new Exception($"connecting error: {e.Message}");
+                logger.LogError(e.Message);
             }
-
         }
 
-        //private static void WriteFile(byte[] res)
-        //{
-        //    try
-        //    {
-        //        using (FileStream fstream = new FileStream($"note.csv", FileMode.OpenOrCreate))
-        //        {
-        //            fstream.Write(res, 0, res.Length);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-
-        //        throw new Exception(e.Message);
-        //    }
-        //}
-
-        private static async Task ParseFile(byte[] bytes)
+        private static async Task ParseFile(byte[] responseBytes)
         {
-            //try
-            //{
-            //    using (var reader = new StreamReader("note.csv"))
-            //    {
-            //        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-            //        {
-            //            List<RatingModel> models = csv.GetRecords<RatingModel>().ToList();
-            //        }
-            //    }
-            //}
-            //catch (Exception e)
-            //{
-            //    throw new Exception(e.Message);
-            //}
-
             char[] splits = new char[] { ';'};
-            string str = Encoding.Default.GetString(bytes).Replace("\r\n", ";");
-            string[] csv = str.Split(splits);
-            for (int i = 0; i < csv.Length; ++i)
+            string responseStr = Encoding.Default.GetString(responseBytes).Replace("\r\n", ";");
+            string[] csv = responseStr.Split(splits);
+            string inn = null, rating = null;
+            try
             {
-                string inn = csv[i];
-                string rating = csv[++i];
-                try
+                logger.LogInformation("try parse csv file");
+                using (Context db = new Context())
+                using (IServices<OrgRatingsModel> ratings = new OrgRatingService(db))
+                for (int i = 0; i < csv.Length; ++i)
                 {
-                    using (Context db = new Context())
-                    using (IServices<OrgRatingsModel> Services = new OrgRatingService(db) )
-                    await Services.CreateAsync(inn, rating);
+                    inn = csv[i];
+                    rating = csv[++i];
+                    await ratings.CreateAsync(inn, rating);
                 }
-                catch (Exception e)
-                {
-                    logger.LogError(string.Format($"{inn}; {rating}; {e.Message}"));
-                }
+                logger.LogInformation("parse succesfull");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(string.Format($"{inn}; {rating}; {e.Message}"));
             }
         }
     }

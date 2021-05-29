@@ -15,16 +15,11 @@ namespace Raiting.Controllers
 {
     [ApiController]
     [Microsoft.AspNetCore.Mvc.Route("[controller]")]
-    public class WeatherForecastController : ApiController
+    public class RatingsController : ApiController
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly ILogger<RatingsController> _logger;
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public RatingsController(ILogger<RatingsController> logger)
         {
             _logger = logger;
         }
@@ -39,10 +34,10 @@ namespace Raiting.Controllers
                 // преобразуем строку в байты
                 byte[] array = new byte[fstream.Length];
                 // считываем данные
-                fstream.Read(array, 0, array.Length);
+                await fstream.ReadAsync(array, 0, array.Length);
 
                 return new FileContentResult(array,
-                    MimeTypeMap.GetMimeType("csv"))
+                MimeTypeMap.GetMimeType("csv"))
                 {
                     FileDownloadName = "raiting.csv"
                 };

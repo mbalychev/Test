@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Copyright>MBalychev@yandex.ru</Copyright>
+    <Description>WebApi for testing</Description>
+    <Authors>MBalychev</Authors>
+    <Company>MBalychev@yandex.ru</Company>
   </PropertyGroup>
 
   <ItemGroup>

@@ -35,26 +35,27 @@ namespace WebTest.Services
             long innInt;
             float ratingFl;
             rating = rating.Replace('.', ',');
-            Int64.TryParse(inn, out innInt);
+            long.TryParse(inn, out innInt);
             float.TryParse(rating, out ratingFl);
 
-            if (inn.Length != 10 && innInt == 0 && ratingFl == 0)
+            if ((inn.Length != 10 || inn.Length != 12) && innInt == 0 && ratingFl > 0)
             {
                  throw new Exception(string.Format("error parse inn or rating {0};{1}", inn, rating));
             }
 
-
             Organization organization = await FindOrganizationAsync(innInt);
-            try
-            {
-                OrgRating orgRating = new OrgRating { OrganizationId = organization.Id, Rating = ratingFl };
-                await db.OrgRatings.AddAsync(orgRating);
-                await db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
+            await CreateRating(organization.Id, ratingFl);
+        }
+
+        private async Task CreateRating(int orgId, float rating)
+        {
+            OrgRating orgRating = await db.OrgRatings.Where(x => x.OrganizationId == orgId).FirstOrDefaultAsync();
+            if (orgRating != null)
+                orgRating.Rating = rating;
+            else
+                await db.OrgRatings.AddAsync(new OrgRating { OrganizationId = orgId, Rating = rating });
+
+            await db.SaveChangesAsync();
         }
 
         private async Task<Organization> FindOrganizationAsync(long inn)
@@ -70,8 +71,7 @@ namespace WebTest.Services
                 }
                 catch (Exception e)
                 {
-
-                    throw;
+                    throw new Exception(e.Message);
                 }
             }
             return organization;
