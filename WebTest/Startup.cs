@@ -29,8 +29,8 @@ namespace WebTest
         {
             services.AddDbContext<Context>();
             services.AddControllersWithViews();
-            services.AddScoped<IServices<OrganizationsModel>, OrganizationService>();
-            services.AddScoped<IServices<OrgRatingsModel>, OrgRatingService>();
+            services.AddTransient<IServices<OrganizationsModel>, OrganizationService>();
+            services.AddTransient<IServices<OrgRatingsModel>, OrgRatingService>();
             services.AddHostedService<RatingService>();
         }
 

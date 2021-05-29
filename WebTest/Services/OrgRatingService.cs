@@ -32,22 +32,17 @@ namespace WebTest.Services
 
         public async Task CreateAsync(string inn, string rating)
         {
-            int innInt = 0;
-            float ratingFl = 0;
-            if (inn.Length == 12)
+            long innInt;
+            float ratingFl;
+            rating = rating.Replace('.', ',');
+            Int64.TryParse(inn, out innInt);
+            float.TryParse(rating, out ratingFl);
+
+            if (inn.Length != 10 && innInt == 0 && ratingFl == 0)
             {
-                try
-                {
-                    innInt = int.Parse(inn);
-                    ratingFl = float.Parse(rating);
-                }
-                catch (Exception e)
-                {
-                    throw new Exception("error parse inn or rating");
-                }
+                 throw new Exception(string.Format("error parse inn or rating {0};{1}", inn, rating));
             }
-            else
-                throw new Exception("error inn");
+
 
             Organization organization = await FindOrganizationAsync(innInt);
             try
@@ -62,17 +57,24 @@ namespace WebTest.Services
             }
         }
 
-        private async Task<Organization> FindOrganizationAsync(int inn)
+        private async Task<Organization> FindOrganizationAsync(long inn)
         {
             Organization organization = await db.Organizations.Where(x => x.Inn == inn).FirstOrDefaultAsync();
             if (organization == null)
             {
-                await db.Organizations.AddAsync(new Organization { Inn = inn });
-                await db.SaveChangesAsync();
-                organization = await db.Organizations.Where(x => x.Inn == inn).FirstOrDefaultAsync();
+                try
+                {
+                    await db.Organizations.AddAsync(new Organization { Inn = inn });
+                    await db.SaveChangesAsync();
+                    organization = await db.Organizations.Where(x => x.Inn == inn).FirstOrDefaultAsync();
+                }
+                catch (Exception e)
+                {
+
+                    throw;
+                }
             }
             return organization;
-
         }
 
         public async Task DeleteAsync(int id)
