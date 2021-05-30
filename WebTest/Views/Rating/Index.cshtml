@@ -1,0 +1,22 @@
+﻿@model List<OrgRatingsModel>
+
+<table class="table">
+    <tr class="thead-light">
+        <th>ИНН</th>
+        <th>Райтинг</th>
+    </tr>
+    @foreach (OrgRatingsModel item in Model)
+    {
+        <tr>
+            <th>
+                @item.Organization.Inn
+            </th>
+            <th>
+                @item.Rating
+            </th>
+        </tr>
+    }
+</table>
+
+
+@{await Html.RenderPartialAsync("Create");}

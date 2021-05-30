@@ -27,7 +27,7 @@ namespace WebTest
             services.AddControllersWithViews();
             services.AddTransient<IServices<OrganizationsModel>, OrganizationService>();
             services.AddTransient<IServices<OrgRatingsModel>, OrgRatingService>();
-            services.AddHostedService<RatingService>();
+            services.AddHostedService<RatingSyncService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

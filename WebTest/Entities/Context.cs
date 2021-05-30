@@ -4,9 +4,18 @@ namespace WebTest.Entities
 {
     public class Context : DbContext
     {
+        private static Context instance;
         public Context()
         {
             Database.EnsureCreated();
+        }
+
+        public static Context GetContext()
+        {
+            if (instance is null)
+                instance = new Context();
+            
+            return instance;
         }
 
         public DbSet<Organization> Organizations { get; set; }

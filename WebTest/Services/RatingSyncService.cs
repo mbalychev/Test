@@ -11,15 +11,17 @@ using WebTest.Models;
 
 namespace WebTest.Services
 {
-    public class RatingService : IHostedService, IDisposable
+    public class RatingSyncService : IHostedService, IDisposable
     {
         private int executionCount = 0;
-        private static ILogger<RatingService> logger;
+        private static ILogger<RatingSyncService> logger;
         private Timer timer;
+        private static IServices<OrgRatingsModel> ratings;
 
-        public RatingService(ILogger<RatingService> _logger)
+        public RatingSyncService(ILogger<RatingSyncService> _logger)
         {
             logger = _logger;
+            ratings = new OrgRatingService(Context.GetContext());
         }
 
         public async Task StartAsync(CancellationToken stoppingToken)
@@ -27,7 +29,7 @@ namespace WebTest.Services
             logger.LogInformation("Rating service start");
             //HACK DoWork create async
             //TODO change timer
-            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
+            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
             //return Task.CompletedTask;
         }
 
@@ -92,8 +94,8 @@ namespace WebTest.Services
             try
             {
                 logger.LogInformation("try parse csv file");
-                using (Context db = new Context())
-                using (IServices<OrgRatingsModel> ratings = new OrgRatingService(db))
+                //using (Context db = new Context())
+                //using (IServices<OrgRatingsModel> ratings = new OrgRatingService(db))
                     for (int i = 0; i < csv.Length; ++i)
                     {
                         inn = csv[i];

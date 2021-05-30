@@ -37,13 +37,13 @@ namespace WebTest.Services
             rating = rating.Replace('.', ',');
             long.TryParse(inn, out innInt);
             float.TryParse(rating, out ratingFl);
-
-            if ((inn.Length != 10 || inn.Length != 12) && innInt == 0 && ratingFl > 0)
+            
+            if ((inn.Length != 10 && inn.Length != 12) || ratingFl <= 0)
             {
                 throw new Exception(string.Format("error parse inn or rating {0};{1}", inn, rating));
             }
 
-            Organization organization = await FindOrganizationAsync(innInt);
+            Organization organization = FindOrganization(innInt);
             await CreateRating(organization.Id, ratingFl);
         }
 
@@ -51,23 +51,34 @@ namespace WebTest.Services
         {
             OrgRating orgRating = await db.OrgRatings.Where(x => x.OrganizationId == orgId).FirstOrDefaultAsync();
             if (orgRating != null)
+            {
                 orgRating.Rating = rating;
+                await db.SaveChangesAsync();
+            }
             else
-                await db.OrgRatings.AddAsync(new OrgRating { OrganizationId = orgId, Rating = rating });
-
-            await db.SaveChangesAsync();
+            {
+                try
+                {
+                    await db.OrgRatings.AddAsync(new OrgRating { OrganizationId = orgId, Rating = rating });
+                    await db.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    throw new Exception(e.Message);
+                }
+            }
         }
 
-        private async Task<Organization> FindOrganizationAsync(long inn)
+        private Organization FindOrganization(long inn)
         {
-            Organization organization = await db.Organizations.Where(x => x.Inn == inn).FirstOrDefaultAsync();
+            Organization organization = db.Organizations.Where(x => x.Inn == inn).FirstOrDefault();
             if (organization == null)
             {
                 try
                 {
-                    await db.Organizations.AddAsync(new Organization { Inn = inn });
-                    await db.SaveChangesAsync();
-                    organization = await db.Organizations.Where(x => x.Inn == inn).FirstOrDefaultAsync();
+                    db.Organizations.Add(new Organization { Inn = inn });
+                    db.SaveChanges();
+                    organization = db.Organizations.Where(x => x.Inn == inn).FirstOrDefault();
                 }
                 catch (Exception e)
                 {
@@ -102,13 +113,15 @@ namespace WebTest.Services
             {
                 List<OrgRatingsModel> models = new List<OrgRatingsModel>();
                 List<OrgRating> orgRatings = await db.OrgRatings.ToListAsync();
+                Organization organization = null;
                 foreach (var item in orgRatings)
                 {
-                    models.Add(new OrgRatingsModel(item));
+                    organization = db.Organizations.Find(item.OrganizationId);
+                    models.Add(new OrgRatingsModel(item, organization));
                 }
                 return models;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw new Exception("error read list org ratings");
             }
@@ -118,8 +131,9 @@ namespace WebTest.Services
         {
             try
             {
+                Organization organization = await db.Organizations.FindAsync(id);
                 OrgRating orgRating = await db.OrgRatings.FindAsync(id);
-                OrgRatingsModel model = new OrgRatingsModel(orgRating);
+                OrgRatingsModel model = new OrgRatingsModel(orgRating, organization);
                 return model;
             }
             catch (Exception)
