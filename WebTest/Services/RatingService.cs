@@ -31,7 +31,7 @@ namespace WebTest.Services
         {
             logger.LogInformation("Rating service start");
             //HACK DoWork create async
-            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(7));
             //return Task.CompletedTask;
         }
 
@@ -69,7 +69,7 @@ namespace WebTest.Services
             HttpResponseMessage response = null;
             try
             {
-                logger.LogInformation("try get csv file from host: {0}");
+                logger.LogInformation("try get csv file from host: {0:t}", DateTime.Now);
                 response = await client.GetAsync("http://localhost:29461/ratings");
                 if (response.IsSuccessStatusCode)
                 {
@@ -79,7 +79,7 @@ namespace WebTest.Services
                 }
                 else
                 {
-                    throw new Exception("connection error: " + response.StatusCode);
+                    throw new Exception(String.Format("connection error: {0} at {1:t}", response.StatusCode, DateTime.Now));
                 }
             }
             catch (Exception e)

@@ -27,7 +27,7 @@ namespace Raiting.Controllers
         [Microsoft.AspNetCore.Mvc.HttpGet]
         public async Task<IActionResult> Get()
         {
-            string path = @"c:\raiting.csv";
+            string path = "raiting.csv";
             byte[] b = new byte[1024];
             using (FileStream fstream = File.OpenRead(path))
             {
