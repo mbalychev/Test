@@ -5,9 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using WebTest.Interfaces;
 using WebTest.Models;
 
 namespace WebTest.Services
@@ -42,12 +40,12 @@ namespace WebTest.Services
                 }
                 else
                 {
-                   throw new Exception("connection error: " + response.StatusCode);
+                    throw new Exception("connection error: " + response.StatusCode);
                 }
             }
             catch (Exception e)
             {
-                throw new Exception ($"connecting error: {e.Message}");
+                throw new Exception($"connecting error: {e.Message}");
             }
         }
 

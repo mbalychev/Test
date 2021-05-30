@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebTest.Entities;
 using WebTest.Interfaces;
 using WebTest.Models;
-using WebTest.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace WebTest.Services
 {
@@ -40,7 +40,7 @@ namespace WebTest.Services
 
             if ((inn.Length != 10 || inn.Length != 12) && innInt == 0 && ratingFl > 0)
             {
-                 throw new Exception(string.Format("error parse inn or rating {0};{1}", inn, rating));
+                throw new Exception(string.Format("error parse inn or rating {0};{1}", inn, rating));
             }
 
             Organization organization = await FindOrganizationAsync(innInt);
@@ -108,7 +108,7 @@ namespace WebTest.Services
                 }
                 return models;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new Exception("error read list org ratings");
             }
@@ -122,7 +122,7 @@ namespace WebTest.Services
                 OrgRatingsModel model = new OrgRatingsModel(orgRating);
                 return model;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new Exception("error read org rating");
             }

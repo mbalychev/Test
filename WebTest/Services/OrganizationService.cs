@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using WebTest.Entities;
 using WebTest.Interfaces;
 using WebTest.Models;
-using WebTest.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace WebTest.Services
 {
@@ -21,9 +20,9 @@ namespace WebTest.Services
         {
             try
             {
-               Organization organization = new Organization { Inn = model.Inn };
-               await db.Organizations.AddAsync(organization);
-               await db.SaveChangesAsync();
+                Organization organization = new Organization { Inn = model.Inn };
+                await db.Organizations.AddAsync(organization);
+                await db.SaveChangesAsync();
             }
             catch (Exception e)
             {

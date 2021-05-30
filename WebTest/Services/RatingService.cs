@@ -1,11 +1,6 @@
-﻿using CsvHelper;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -31,7 +26,8 @@ namespace WebTest.Services
         {
             logger.LogInformation("Rating service start");
             //HACK DoWork create async
-            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(7));
+            //TODO change timer
+            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
             //return Task.CompletedTask;
         }
 
@@ -62,8 +58,7 @@ namespace WebTest.Services
             timer?.Dispose();
         }
 
-
-        async Task GetLoadAsync()
+        private async Task GetLoadAsync()
         {
             HttpClient client = new HttpClient();
             HttpResponseMessage response = null;
@@ -75,7 +70,7 @@ namespace WebTest.Services
                 {
                     byte[] responseBytes = await response.Content.ReadAsByteArrayAsync();
                     logger.LogInformation("get {0} bytes", responseBytes.Length);
-                    await ParseFile(responseBytes); 
+                    await ParseFile(responseBytes);
                 }
                 else
                 {
@@ -90,7 +85,7 @@ namespace WebTest.Services
 
         private static async Task ParseFile(byte[] responseBytes)
         {
-            char[] splits = new char[] { ';'};
+            char[] splits = new char[] { ';' };
             string responseStr = Encoding.Default.GetString(responseBytes).Replace("\r\n", ";");
             string[] csv = responseStr.Split(splits);
             string inn = null, rating = null;
@@ -99,12 +94,12 @@ namespace WebTest.Services
                 logger.LogInformation("try parse csv file");
                 using (Context db = new Context())
                 using (IServices<OrgRatingsModel> ratings = new OrgRatingService(db))
-                for (int i = 0; i < csv.Length; ++i)
-                {
-                    inn = csv[i];
-                    rating = csv[++i];
-                    await ratings.CreateAsync(inn, rating);
-                }
+                    for (int i = 0; i < csv.Length; ++i)
+                    {
+                        inn = csv[i];
+                        rating = csv[++i];
+                        await ratings.CreateAsync(inn, rating);
+                    }
                 logger.LogInformation("parse succesfull");
             }
             catch (Exception e)

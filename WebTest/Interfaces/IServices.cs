@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace WebTest.Interfaces
@@ -12,7 +11,7 @@ namespace WebTest.Interfaces
         Task<T> ReadAsync(int id);
         Task<List<T>> ReadAllAsync();
         Task UpdateAsync(T item);
-        Task DeleteAsync (int id);
+        Task DeleteAsync(int id);
 
     }
 }
