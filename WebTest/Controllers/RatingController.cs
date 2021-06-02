@@ -40,11 +40,11 @@ namespace WebTest.Controllers
         // POST: RatingController1/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(string inn, string rating)
+        public async Task<ActionResult> Create(string inn, string rating)
         {
             try
             {
-                ratings.CreateAsync(inn, rating);
+                await ratings.CreateAsync(inn, rating);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception e)

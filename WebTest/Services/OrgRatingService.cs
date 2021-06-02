@@ -43,11 +43,11 @@ namespace WebTest.Services
                 throw new Exception(string.Format("error parse inn or rating {0};{1}", inn, rating));
             }
 
-            Organization organization = FindOrganization(innInt);
-            await CreateRating(organization.Id, ratingFl);
+            Organization organization = await FindOrganizationAsync(innInt);
+            await CreateRatingAsync(organization.Id, ratingFl);
         }
 
-        private async Task CreateRating(int orgId, float rating)
+        private async Task CreateRatingAsync(int orgId, float rating)
         {
             OrgRating orgRating = await db.OrgRatings.Where(x => x.OrganizationId == orgId).FirstOrDefaultAsync();
             if (orgRating != null)
@@ -69,15 +69,15 @@ namespace WebTest.Services
             }
         }
 
-        private Organization FindOrganization(long inn)
+        private async Task<Organization> FindOrganizationAsync(long inn)
         {
             Organization organization = db.Organizations.Where(x => x.Inn == inn).FirstOrDefault();
             if (organization == null)
             {
                 try
                 {
-                    db.Organizations.Add(new Organization { Inn = inn });
-                    db.SaveChanges();
+                    await db.Organizations.AddAsync(new Organization { Inn = inn });
+                    await db.SaveChangesAsync();
                     organization = db.Organizations.Where(x => x.Inn == inn).FirstOrDefault();
                 }
                 catch (Exception e)
