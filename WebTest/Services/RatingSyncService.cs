@@ -27,14 +27,9 @@ namespace WebTest.Services
         public async Task StartAsync(CancellationToken token)
         {
             logger.LogInformation("Rating service start");
-            //HACK DoWork create async
             //TODO change timer
-            //timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
-            //while(!token.IsCancellationRequested)
-            //{
-                await Task.Delay(10000, token);
+                await Task.Delay(TimeSpan.FromSeconds(20), token);
                 await DoWorkAsync(null);
-            //}
             //return Task.CompletedTask;
         }
 
@@ -53,10 +48,7 @@ namespace WebTest.Services
 
         public Task StopAsync(CancellationToken stoppingToken)
         {
-
             this.Dispose();
-            //timer?.Change(Timeout.Infinite, 0);
-
             return Task.CompletedTask;
         }
 
@@ -64,7 +56,6 @@ namespace WebTest.Services
         {
             logger.LogInformation("Timed Hosted Service is stopping.");
             source.Dispose();
-            //timer?.Dis`pose();
         }
 
         private async Task GetLoadAsync()
