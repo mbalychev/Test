@@ -16,27 +16,34 @@ namespace WebTest.Services
         private int executionCount = 0;
         private static ILogger<RatingSyncService> logger;
         private Timer timer;
+        static CancellationTokenSource source = new CancellationTokenSource();
+        static CancellationToken token = source.Token;
 
         public RatingSyncService(ILogger<RatingSyncService> _logger)
         {
             logger = _logger;
         }
 
-        public async Task StartAsync(CancellationToken stoppingToken)
+        public async Task StartAsync(CancellationToken token)
         {
             logger.LogInformation("Rating service start");
             //HACK DoWork create async
             //TODO change timer
-            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
+            //timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
+            //while(!token.IsCancellationRequested)
+            //{
+                await Task.Delay(10000, token);
+                await DoWorkAsync(null);
+            //}
             //return Task.CompletedTask;
         }
 
-        private void DoWork(object state)
+        private async Task DoWorkAsync(object state)
         {
             var count = Interlocked.Increment(ref executionCount);
             try
             {
-                GetLoadAsync();
+               await GetLoadAsync();
             }
             catch (Exception e)
             {
@@ -46,16 +53,18 @@ namespace WebTest.Services
 
         public Task StopAsync(CancellationToken stoppingToken)
         {
-            logger.LogInformation("Timed Hosted Service is stopping.");
 
-            timer?.Change(Timeout.Infinite, 0);
+            this.Dispose();
+            //timer?.Change(Timeout.Infinite, 0);
 
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
-            timer?.Dispose();
+            logger.LogInformation("Timed Hosted Service is stopping.");
+            source.Dispose();
+            //timer?.Dis`pose();
         }
 
         private async Task GetLoadAsync()
